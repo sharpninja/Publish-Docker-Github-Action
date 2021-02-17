@@ -1,5 +1,6 @@
 #!/bin/sh
-#set -e
+set -e
+
 echo "::debug::Start. $1 $2 $3 $4"
 
 main() {
