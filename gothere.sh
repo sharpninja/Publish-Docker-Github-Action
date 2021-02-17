@@ -75,6 +75,15 @@ main() {
         exit 0
     fi
 
+    push
+
+    echo "::set-output name=tag::${FIRST_TAG}"
+    DIGEST=${docker inspect --format='{{index .RepoDigests 0}}' ${DOCKERNAME}}
+    echo "::set-output name=digest::${DIGEST}"
+    echo "::debug::FIRST_TAG: $FIRST_TAG"
+    echo "::debug::DIGEST: $DIGEST"
+
+    docker logout
 }
 
 sanitize() {
