@@ -65,6 +65,16 @@ main() {
         useSnapshot
     fi
 
+    build
+
+    if usesBoolean "${no_push}"; then
+        if uses "${username}" && uses "${password}"; then
+        echo "::debug::docker logout"
+        docker logout
+        fi
+        exit 0
+    fi
+
 }
 
 sanitize() {
