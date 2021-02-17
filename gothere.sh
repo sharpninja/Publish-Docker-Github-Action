@@ -10,13 +10,13 @@ main() {
         set -x
     fi
 
-    registryToLower
+    registry_urlToLower
     nameToLower
 
-    echo "::debug::registry: $registry"
-    REGISTRY_NO_PROTOCOL=$(echo "${registry}" | sed -e 's/^https:\/\///g')
-    if uses "${registry}" && ! isPartOfTheName "${REGISTRY_NO_PROTOCOL}"; then
-        name="${REGISTRY_NO_PROTOCOL}/${name}"
+    echo "::debug::registry_url: $registry_url"
+    registry_url_NO_PROTOCOL=$(echo "${registry_url}" | sed -e 's/^https:\/\///g')
+    if uses "${registry_url}" && ! isPartOfTheName "${registry_url_NO_PROTOCOL}"; then
+        name="${registry_url_NO_PROTOCOL}/${name}"
         echo "::debug::name: $name"
     fi
 
@@ -37,8 +37,8 @@ main() {
     echo "::debug::password: $password"
     echo "::debug::tenantId: $tenantId"
     if uses "${username}" && uses "${password}"; then
-        echo "::debug::docker login -u ${username} -p ${password} ${registry}"
-        docker login -u ${username} -p ${password} ${registry}
+        echo "::debug::docker login -u ${username} -p ${password} ${registry_url}"
+        docker login -u ${username} -p ${password} ${registry_url}
     fi
 
 }
@@ -51,10 +51,10 @@ sanitize() {
     fi
 }
 
-registryToLower() {
-    echo "::debug::registryToLower [$1]"
-    registry=$(echo "$1" | tr '[A-Z]' '[a-z]')
-    echo "::debug::registry: $registry"
+registry_urlToLower() {
+    echo "::debug::registry_urlToLower [$1]"
+    registry_url=$(echo "$1" | tr '[A-Z]' '[a-z]')
+    echo "::debug::registry_url: $registry_url"
 }
 
 nameToLower() {

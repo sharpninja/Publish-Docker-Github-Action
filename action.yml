@@ -14,7 +14,7 @@ inputs:
   password:
     description: 'The login password for the registry'
     required: true
-  registry:
+  registry_url:
     description: 'Use registry for pushing to a custom registry'
     required: false
   snapshot:
