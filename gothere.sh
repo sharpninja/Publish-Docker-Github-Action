@@ -37,8 +37,8 @@ main() {
     echo "::debug::password: $password"
     echo "::debug::tenantId: $tenantId"
     if uses "${username}" && uses "${password}"; then
-        echo "::debug::docker login -u ${username} -p ${password} ${registry} --debug"
-        docker login -u ${username} -p ${password} ${registry} --debug
+        echo "::debug::docker login -u ${username} -p ${password} ${registry}"
+        docker login -u ${username} -p ${password} ${registry}
     fi
 
 }
