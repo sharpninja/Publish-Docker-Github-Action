@@ -46,7 +46,7 @@ main() {
     DOCKERNAME="${name}:${FIRST_TAG}"
     echo "::debug::DOCKERNAME: $DOCKERNAME"
     BUILDPARAMS=""
-    CONTEXT="."
+    build_context="."
 
     if uses "${dockerfile}"; then
         useCustomDockerfile
@@ -55,8 +55,8 @@ main() {
         addBuildArgs
     fi
     if uses "${context}"; then
-        CONTEXT="${context}"
-        echo "::debug::CONTEXT: $CONTEXT"
+        build_context="${context}"
+        echo "::debug::build_context: $build_context"
     fi
     if usesBoolean "${cache}"; then
         useBuildCache
@@ -227,8 +227,8 @@ build() {
         BUILD_TAGS="${BUILD_TAGS}-t ${name}:${TAG} "
         echo "::debug::BUILD_TAGS: $BUILD_TAGS"
     done
-    echo "docker build ${INPUT_BUILDOPTIONS} ${BUILDPARAMS} ${BUILD_TAGS} ${CONTEXT}"
-    docker build ${INPUT_BUILDOPTIONS} ${BUILDPARAMS} ${BUILD_TAGS} ${CONTEXT}
+    echo "docker build ${buildoptions} ${BUILDPARAMS} ${BUILD_TAGS} ${build_context}"
+    docker build ${buildoptions} ${BUILDPARAMS} ${BUILD_TAGS} ${build_context}
 }
 
 push() {
