@@ -1,4 +1,4 @@
-FROM docker:19.03.2 as runtime
+FROM docker:latest as runtime
 LABEL "repository"="https://github.com/sharpninja/Publish-Docker-Github-Action"
 LABEL "maintainer"="Sharp Ninja (original by Lars Gohr)"
 

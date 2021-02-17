@@ -1,5 +1,5 @@
 #!/bin/sh
-set -e
+#set -e
 
 main() {
   echo "::debug::Starting." # see https://github.com/actions/toolkit/issues/168
