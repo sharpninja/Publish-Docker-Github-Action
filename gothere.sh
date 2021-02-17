@@ -1,12 +1,12 @@
 #!/bin/sh
 #set -e
-echo "::debug::Start."
+echo "::debug::Start. $1 $2 $3 $4"
 
 main() {
     echo "::debug::Main." # see https://github.com/actions/toolkit/issues/168
 
-    if usesBoolean "$(ACTIONS_STEP_DEBUG)"; then
-        echo "::debug::ACTIONS_STEP_DEBUG: $(ACTIONS_STEP_DEBUG)"
+    if usesBoolean "$ACTIONS_STEP_DEBUG"; then
+        echo "::debug::ACTIONS_STEP_DEBUG: $ACTIONS_STEP_DEBUG"
         #     echo "::add-mask::${INPUT_USERNAME}"
         #     echo "::add-mask::${INPUT_PASSWORD}"
         set -x
@@ -28,13 +28,13 @@ isOnDefaultBranch() {
 }
 
 isGitTag() {
-  echo "::debug::isGitTag \"[${$1}] - [$1]\""
-  [ $(echo "${GITHUB_REF}" | sed -e "s/refs\/tags\///g") != "${$1}" ]
+  echo "::debug::isGitTag [$1]"
+  [ $(echo "${GITHUB_REF}" | sed -e "s/refs\/tags\///g") != "$1" ]
 }
 
 isPullRequest() {
-  echo "::debug::isPullRequest \"[${$1}] - [$1]\""
-  [ $(echo "${GITHUB_REF}" | sed -e "s/refs\/pull\///g") != "${$1}" ]
+  echo "::debug::isPullRequest [$1]"
+  [ $(echo "${GITHUB_REF}" | sed -e "s/refs\/pull\///g") != "$1" ]
 }
 
 changeWorkingDirectory() {
@@ -50,8 +50,8 @@ useCustomDockerfile() {
 }
 
 addBuildArgs() {
-  echo "::debug::hasCustomTag \"[${$1}] - [$1]\""
-  for ARG in $(echo "${$1}" | tr ',' '\n'); do
+  echo "::debug::hasCustomTag [$1]"
+  for ARG in $(echo "$1" | tr ',' '\n'); do
     BUILDPARAMS="${BUILDPARAMS} --build-arg ${ARG}"
     echo "::debug::BUILDPARAMS: $BUILDPARAMS"
     echo "::debug::ARG: $ARG"
@@ -67,30 +67,30 @@ useBuildCache() {
 }
 
 uses() {
-  echo "::debug::uses \"[${1}] - [$1]\""
-  [ ! -z "${1}" ]
+  echo "::debug::uses [$1]"
+  [ ! -z "$1" ]
 }
 
 usesBoolean() {
-  echo "::debug::usesBoolean \"[${1}] - [$1]\""
+  echo "::debug::usesBoolean [$1]"
 
-  [ ! -z "${1}" ] && [ "${1}" = "true" ]
+  [ ! -z "$1" ] && [ "$1" = "true" ]
 }
 
 isSemver() {
-  echo "::debug::isSemver \"[${1}] - [$1]\""
-  echo "${1}" | grep -Eq '^refs/tags/v?([0-9]+)\.([0-9]+)\.([0-9]+)(-[a-zA-Z]+(\.[0-9]+)?)?$'
+  echo "::debug::isSemver [$1]"
+  echo "$1" | grep -Eq '^refs/tags/v?([0-9]+)\.([0-9]+)\.([0-9]+)(-[a-zA-Z]+(\.[0-9]+)?)?$'
 }
 
 isPreRelease() {
-  echo "::debug::isPreRelease \"[${1}] - [$1]\""
-  echo "${1}" | grep -Eq '-'
+  echo "::debug::isPreRelease [$1]"
+  echo "$1" | grep -Eq '-'
 }
 
 useSnapshot() {
-  echo "::debug::useSnapshot \"[${1}] - [$1]\""
+  echo "::debug::useSnapshot [$1]"
   local TIMESTAMP=`date +%Y%m%d%H%M%S`
-  local SHORT_SHA=$(echo "${$1}" | cut -c1-6)
+  local SHORT_SHA=$(echo "$1" | cut -c1-6)
   local SNAPSHOT_TAG="${TIMESTAMP}${SHORT_SHA}"
   TAGS="${TAGS} ${SNAPSHOT_TAG}"
   echo "::set-output name=snapshot-tag::${SNAPSHOT_TAG}"
