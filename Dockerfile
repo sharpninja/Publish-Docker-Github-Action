@@ -17,4 +17,4 @@ ENTRYPOINT ["/entrypoint.sh"]
 # ADD mock.sh /usr/bin/date
 # RUN /test.bats
 
-FROM runtime
+# FROM runtime
