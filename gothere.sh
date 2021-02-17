@@ -78,12 +78,12 @@ main() {
 
     push
 
-    echo "::set-output name=tag::${FIRST_TAG}"
-    echo "::debug::main: Before Setting Digest."
-    DIGEST=${docker inspect --format='{{index .RepoDigests 0}}' ${DOCKERNAME}}
-    echo "::debug::DIGEST: $DIGEST"
-    echo "::set-output name=digest::${DIGEST}"
-    echo "::debug::FIRST_TAG: $FIRST_TAG"
+    # echo "::set-output name=tag::${FIRST_TAG}"
+    # echo "::debug::main: Before Setting Digest."
+    # DIGEST=${docker inspect --format='{{index .RepoDigests 0}}' ${DOCKERNAME}}
+    # echo "::debug::DIGEST: $DIGEST"
+    # echo "::set-output name=digest::${DIGEST}"
+    # echo "::debug::FIRST_TAG: $FIRST_TAG"
 
     docker logout
 
