@@ -1,8 +1,9 @@
 #!/bin/sh
 #set -e
+echo "::debug::Start."
 
 main() {
-  echo "::debug::Starting." # see https://github.com/actions/toolkit/issues/168
+  echo "::debug::Main." # see https://github.com/actions/toolkit/issues/168
 
   if usesBoolean "${ACTIONS_STEP_DEBUG}"; then
 #     echo "::add-mask::${INPUT_USERNAME}"
@@ -229,6 +230,6 @@ push() {
   done
 }
 
-main
+# main
 
 echo "::debug::Finished."
