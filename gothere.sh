@@ -13,23 +13,28 @@ main() {
     registryToLower
     nameToLower
 
+    echo "::debug::registry: $registry"
     REGISTRY_NO_PROTOCOL=$(echo "${registry}" | sed -e 's/^https:\/\///g')
     if uses "${registry}" && ! isPartOfTheName "${REGISTRY_NO_PROTOCOL}"; then
-        INPUT_NAME="${REGISTRY_NO_PROTOCOL}/${INPUT_NAME}"
-        echo "::debug::INPUT_NAME: $INPUT_NAME"
+        name="${REGISTRY_NO_PROTOCOL}/${name}"
+        echo "::debug::name: $name"
     fi
 
+    echo "::debug::tags: $tags"
     if uses "${tags}"; then
-        TAGS=$(echo "$1" | sed "s/,/ /g")
+        TAGS=$(echo "$tags" | sed "s/,/ /g")
         echo "::debug::TAGS: $TAGS"
     else
         translateDockerTag
     fi
 
+    echo "::debug::workdir: $workdir"
     if uses "${workdir}"; then
         changeWorkingDirectory
     fi
 
+    echo "::debug::username: $username"
+    echo "::debug::password: $password"
     if uses "${username}" && uses "${password}"; then
         echo "::debug::docker login -u ${username} -p ${password} ${registry} --verbose"
         docker login -u ${username} -p ${password} ${registry} --verbose
@@ -53,22 +58,22 @@ registryToLower() {
 
 nameToLower() {
     echo "::debug::nameToLower"
-    INPUT_NAME=$(echo "${INPUT_NAME}" | tr '[A-Z]' '[a-z]')
-    echo "::debug::INPUT_NAME: $INPUT_NAME"
+    name=$(echo "${name}" | tr '[A-Z]' '[a-z]')
+    echo "::debug::name: $name"
 }
 
 isPartOfTheName() {
     echo "::debug::isPartOfTheName [$1]"
-    [ $(echo "${INPUT_NAME}" | sed -e "s/${1}//g") != "${INPUT_NAME}" ]
+    [ $(echo "${name}" | sed -e "s/${1}//g") != "${name}" ]
 }
 
 translateDockerTag() {
     local BRANCH=$(echo "$1" | sed -e "s/refs\/heads\///g" | sed -e "s/\//-/g")
     if hasCustomTag; then
-        TAGS=$(echo "${INPUT_NAME}" | cut -d':' -f2)
+        TAGS=$(echo "${name}" | cut -d':' -f2)
         echo "::debug::TAGS: $TAGS"
-        INPUT_NAME=$(echo "${INPUT_NAME}" | cut -d':' -f1)
-        echo "::debug::INPUT_NAME: $INPUT_NAME"
+        name=$(echo "${name}" | cut -d':' -f1)
+        echo "::debug::name: $name"
     elif isOnDefaultBranch; then
         TAGS="latest"
         echo "::debug::TAGS: $TAGS"
@@ -97,7 +102,7 @@ translateDockerTag() {
 
 hasCustomTag() {
     echo "::debug::hasCustomTag"
-    [ $(echo "${INPUT_NAME}" | sed -e "s/://g") != "${INPUT_NAME}" ]
+    [ $(echo "${name}" | sed -e "s/://g") != "${name}" ]
 }
 
 isOnDefaultBranch() {
@@ -183,7 +188,7 @@ build() {
     echo "::debug::build"
     local BUILD_TAGS=""
     for TAG in ${TAGS}; do
-        BUILD_TAGS="${BUILD_TAGS}-t ${INPUT_NAME}:${TAG} "
+        BUILD_TAGS="${BUILD_TAGS}-t ${name}:${TAG} "
         echo "::debug::BUILD_TAGS: $BUILD_TAGS"
     done
     echo "docker build ${INPUT_BUILDOPTIONS} ${BUILDPARAMS} ${BUILD_TAGS} ${CONTEXT}"
@@ -193,8 +198,8 @@ build() {
 push() {
     echo "::debug::push"
     for TAG in ${TAGS}; do
-        echo "::debug::docker push \"${INPUT_NAME}:${TAG}\""
-        docker push "${INPUT_NAME}:${TAG}"
+        echo "::debug::docker push \"${name}:${TAG}\""
+        docker push "${name}:${TAG}"
     done
 }
 
