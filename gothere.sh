@@ -19,6 +19,22 @@ main() {
         echo "::debug::INPUT_NAME: $INPUT_NAME"
     fi
 
+    if uses "${INPUT_TAGS}"; then
+        TAGS=$(echo "$1" | sed "s/,/ /g")
+        echo "::debug::TAGS: $TAGS"
+    else
+        translateDockerTag
+    fi
+
+    if uses "${INPUT_WORKDIR}"; then
+        changeWorkingDirectory
+    fi
+
+    if uses "${INPUT_USERNAME}" && uses "${INPUT_PASSWORD}"; then
+        echo "::debug::docker login -u ${INPUT_USERNAME} -p ${INPUT_PASSWORD} ${INPUT_REGISTRY} --verbose"
+        docker login -u ${INPUT_USERNAME} -p ${INPUT_PASSWORD} ${INPUT_REGISTRY} --verbose
+    fi
+
 }
 
 sanitize() {
