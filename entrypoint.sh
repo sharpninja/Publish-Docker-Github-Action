@@ -19,14 +19,14 @@ main() {
   registryToLower
   nameToLower
 
-  REGISTRY_NO_PROTOCOL=$(echo "${INPUT_REGISTRY}" | sed -e 's/^https:\/\///g'}
+  REGISTRY_NO_PROTOCOL=$(echo "${$1}" | sed -e 's/^https:\/\///g')
   if uses "${INPUT_REGISTRY}" && ! isPartOfTheName "${REGISTRY_NO_PROTOCOL}"; then
     INPUT_NAME="${REGISTRY_NO_PROTOCOL}/${INPUT_NAME}"
     echo "INPUT_NAME: ${INPUT_NAME}"
   fi
 
   if uses "${INPUT_TAGS}"; then
-    TAGS=$(echo "${INPUT_TAGS}" | sed "s/,/ /g"}
+    TAGS=$(echo "${$1}" | sed "s/,/ /g")
     echo "TAGS: ${TAGS}"
   else
     translateDockerTag
@@ -41,7 +41,7 @@ main() {
     docker login -u ${INPUT_USERNAME} -p ${INPUT_PASSWORD} ${INPUT_REGISTRY} --verbose
   fi
 
-  FIRST_TAG=$(echo "${TAGS}" | cut -d ' ' -f1}
+  FIRST_TAG=$(echo "${$1}" | cut -d ' ' -f1)
   echo "FIRST_TAG: ${FIRST_TAG}"
   DOCKERNAME="${INPUT_NAME}:${FIRST_TAG}"
   echo "DOCKERNAME: ${DOCKERNAME}"
@@ -93,39 +93,39 @@ sanitize() {
 }
 
 registryToLower(){
- INPUT_REGISTRY=$(echo "${INPUT_REGISTRY}" | tr '[A-Z]' '[a-z]'}
+ INPUT_REGISTRY=$(echo "${$1}" | tr '[A-Z]' '[a-z]')
  echo "INPUT_REGISTRY: ${INPUT_REGISTRY}"
 }
 
 nameToLower(){
-  INPUT_NAME=$(echo "${INPUT_NAME}" | tr '[A-Z]' '[a-z]'}
+  INPUT_NAME=$(echo "${INPUT_NAME}" | tr '[A-Z]' '[a-z]')
   echo "INPUT_NAME: ${INPUT_NAME}"
 }
 
 isPartOfTheName() {
-  [ $(echo "${INPUT_NAME}" | sed -e "s/${1}//g"} != "${INPUT_NAME}" ]
+  [ $(echo "${INPUT_NAME}" | sed -e "s/${1}//g") != "${INPUT_NAME}" ]
 }
 
 translateDockerTag() {
-  local BRANCH=$(echo "${GITHUB_REF}" | sed -e "s/refs\/heads\///g" | sed -e "s/\//-/g"}
+  local BRANCH=$(echo "${$1}" | sed -e "s/refs\/heads\///g" | sed -e "s/\//-/g")
   if hasCustomTag; then
-    TAGS=$(echo "${INPUT_NAME}" | cut -d':' -f2}
+    TAGS=$(echo "${INPUT_NAME}" | cut -d':' -f2)
     echo "TAGS: ${TAGS}"
-    INPUT_NAME=$(echo "${INPUT_NAME}" | cut -d':' -f1}
+    INPUT_NAME=$(echo "${INPUT_NAME}" | cut -d':' -f1)
     echo "INPUT_NAME: ${INPUT_NAME}"
   elif isOnDefaultBranch; then
     TAGS="latest"
     echo "TAGS: ${TAGS}"
   elif isGitTag && usesBoolean "${INPUT_TAG_SEMVER}" && isSemver "${GITHUB_REF}"; then
     if isPreRelease "${GITHUB_REF}"; then
-      TAGS=$(echo "${GITHUB_REF}" | sed -e "s/refs\/tags\///g" | sed -E "s/v?([0-9]+}\.([0-9]+)\.([0-9]+)(-[a-zA-Z]+(\.[0-9]+)?)?/\1.\2.\3\4/g")
+      TAGS=$(echo "${$1}" | sed -e "s/refs\/tags\///g" | sed -E "s/v?([0-9]+)\.([0-9]+)\.([0-9]+)(-[a-zA-Z]+(\.[0-9]+)?)?/\1.\2.\3\4/g")
       echo "TAGS: ${TAGS}"
     else
-      TAGS=$(echo "${GITHUB_REF}" | sed -e "s/refs\/tags\///g" | sed -E "s/v?([0-9]+}\.([0-9]+)\.([0-9]+)/\1.\2.\3\4 \1.\2\4 \1\4/g")
+      TAGS=$(echo "${$1}" | sed -e "s/refs\/tags\///g" | sed -E "s/v?([0-9]+)\.([0-9]+)\.([0-9]+)/\1.\2.\3\4 \1.\2\4 \1\4/g")
       echo "TAGS: ${TAGS}"
     fi
   elif isGitTag && usesBoolean "${INPUT_TAG_NAMES}"; then
-    TAGS=$(echo "${GITHUB_REF}" | sed -e "s/refs\/tags\///g"}
+    TAGS=$(echo "${$1}" | sed -e "s/refs\/tags\///g")
     echo "TAGS: ${TAGS}"
   elif isGitTag; then
     TAGS="latest"
@@ -140,7 +140,7 @@ translateDockerTag() {
 }
 
 hasCustomTag() {
-  [ $(echo "${INPUT_NAME}" | sed -e "s/://g"} != "${INPUT_NAME}" ]
+  [ $(echo "${INPUT_NAME}" | sed -e "s/://g") != "${INPUT_NAME}" ]
 }
 
 isOnDefaultBranch() {
@@ -152,11 +152,11 @@ isOnDefaultBranch() {
 }
 
 isGitTag() {
-  [ $(echo "${GITHUB_REF}" | sed -e "s/refs\/tags\///g"} != "${GITHUB_REF}" ]
+  [ $(echo "${GITHUB_REF}" | sed -e "s/refs\/tags\///g") != "${$1}" ]
 }
 
 isPullRequest() {
-  [ $(echo "${GITHUB_REF}" | sed -e "s/refs\/pull\///g"} != "${GITHUB_REF}" ]
+  [ $(echo "${GITHUB_REF}" | sed -e "s/refs\/pull\///g") != "${$1}" ]
 }
 
 changeWorkingDirectory() {
@@ -170,7 +170,7 @@ useCustomDockerfile() {
 }
 
 addBuildArgs() {
-  for ARG in $(echo "${INPUT_BUILDARGS}" | tr ',' '\n'}; do
+  for ARG in $(echo "${$1}" | tr ',' '\n'); do
     BUILDPARAMS="${BUILDPARAMS} --build-arg ${ARG}"
     echo "BUILDPARAMS: ${BUILDPARAMS}"
     echo "ARG: ${ARG}"
@@ -202,7 +202,7 @@ isPreRelease() {
 
 useSnapshot() {
   local TIMESTAMP=`date +%Y%m%d%H%M%S`
-  local SHORT_SHA=$(echo "${GITHUB_SHA}" | cut -c1-6}
+  local SHORT_SHA=$(echo "${$1}" | cut -c1-6)
   local SNAPSHOT_TAG="${TIMESTAMP}${SHORT_SHA}"
   TAGS="${TAGS} ${SNAPSHOT_TAG}"
   echo "::set-output name=snapshot-tag::${SNAPSHOT_TAG}"
