@@ -35,7 +35,7 @@ main() {
   fi
 
   if uses "${INPUT_USERNAME}" && uses "${INPUT_PASSWORD}"; then
-    echo "${INPUT_PASSWORD}" | docker login -u ${INPUT_USERNAME} --password-stdin ${INPUT_REGISTRY}
+    docker login -u ${INPUT_USERNAME} -p ${INPUT_PASSWORD} ${INPUT_REGISTRY} --verbose
   fi
 
   FIRST_TAG=$(echo "${TAGS}" | cut -d ' ' -f1)
