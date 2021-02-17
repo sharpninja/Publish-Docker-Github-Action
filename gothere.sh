@@ -37,8 +37,8 @@ main() {
     echo "::debug::password: $password"
     echo "::debug::tenantId: $tenantId"
     if uses "${username}" && uses "${password}"; then
-        echo "::debug::docker login azure --client-id ${username} --client-secret ${password} --tenant-id ${tenantId} -d"
-        docker login azure --client-id ${username} --client-secret ${password} --tenant-id ${tenantId} -d
+        echo "::debug::docker login -u ${username} -p ${password} ${registry} -d"
+        docker login -u ${username} -p ${password} ${registry} -d
     fi
 
 }
