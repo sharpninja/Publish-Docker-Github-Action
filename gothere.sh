@@ -41,6 +41,30 @@ main() {
         docker login -u ${username} -p ${password} ${registry_url}
     fi
 
+    FIRST_TAG=$(echo "${$1}" | cut -d ' ' -f1)
+    echo "::debug::FIRST_TAG: $FIRST_TAG"
+    DOCKERNAME="${name}:${FIRST_TAG}"
+    echo "::debug::DOCKERNAME: $DOCKERNAME"
+    BUILDPARAMS=""
+    CONTEXT="."
+
+    if uses "${dockerfile}"; then
+        useCustomDockerfile
+    fi
+    if uses "${buildargs}"; then
+        addBuildArgs
+    fi
+    if uses "${context}"; then
+        CONTEXT="${context}"
+        echo "::debug::CONTEXT: $CONTEXT"
+    fi
+    if usesBoolean "${cache}"; then
+        useBuildCache
+    fi
+    if usesBoolean "${snapshot}"; then
+        useSnapshot
+    fi
+
 }
 
 sanitize() {
@@ -134,7 +158,7 @@ changeWorkingDirectory() {
 
 useCustomDockerfile() {
     echo "::debug::useCustomDockerfile"
-    BUILDPARAMS="${BUILDPARAMS} -f ${INPUT_DOCKERFILE}"
+    BUILDPARAMS="${BUILDPARAMS} -f ${dockerfile}"
     echo "::debug::BUILDPARAMS: $BUILDPARAMS"
 }
 
