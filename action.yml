@@ -1,8 +1,8 @@
-name: 'Publish Docker'
-author: 'Lars Gohr'
+name: 'Publish Docker to Azure'
+author: 'Sharp Ninja (original by Lars Gohr)'
 branding:
   icon: 'anchor'
-  color: 'blue'
+  color: 'green'
 description: 'Uses the git branch as the docker tag and pushes the container'
 inputs:
   name:
