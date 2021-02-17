@@ -6,9 +6,9 @@ RUN apk update \
   && apk upgrade \
   && apk add --no-cache git
 
-ADD entrypoint.sh /entrypoint.sh
-RUN chmod +x /entrypoint.sh
-ENTRYPOINT ["/entrypoint.sh"]
+ADD gothere.sh /gothere.sh
+RUN chmod +x /gothere.sh
+ENTRYPOINT ["/gothere.sh"]
 
 # FROM runtime as testEnv
 # RUN apk add --no-cache coreutils bats
