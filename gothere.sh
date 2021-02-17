@@ -13,26 +13,26 @@ main() {
     registryToLower
     nameToLower
 
-    REGISTRY_NO_PROTOCOL=$(echo "$1" | sed -e 's/^https:\/\///g')
-    if uses "${INPUT_REGISTRY}" && ! isPartOfTheName "${REGISTRY_NO_PROTOCOL}"; then
+    REGISTRY_NO_PROTOCOL=$(echo "${registry}" | sed -e 's/^https:\/\///g')
+    if uses "${registry}" && ! isPartOfTheName "${REGISTRY_NO_PROTOCOL}"; then
         INPUT_NAME="${REGISTRY_NO_PROTOCOL}/${INPUT_NAME}"
         echo "::debug::INPUT_NAME: $INPUT_NAME"
     fi
 
-    if uses "${INPUT_TAGS}"; then
+    if uses "${tags}"; then
         TAGS=$(echo "$1" | sed "s/,/ /g")
         echo "::debug::TAGS: $TAGS"
     else
         translateDockerTag
     fi
 
-    if uses "${INPUT_WORKDIR}"; then
+    if uses "${workdir}"; then
         changeWorkingDirectory
     fi
 
-    if uses "${INPUT_USERNAME}" && uses "${INPUT_PASSWORD}"; then
-        echo "::debug::docker login -u ${INPUT_USERNAME} -p ${INPUT_PASSWORD} ${INPUT_REGISTRY} --verbose"
-        docker login -u ${INPUT_USERNAME} -p ${INPUT_PASSWORD} ${INPUT_REGISTRY} --verbose
+    if uses "${username}" && uses "${password}"; then
+        echo "::debug::docker login -u ${username} -p ${password} ${registry} --verbose"
+        docker login -u ${username} -p ${password} ${registry} --verbose
     fi
 
 }
@@ -47,8 +47,8 @@ sanitize() {
 
 registryToLower() {
     echo "::debug::registryToLower [$1]"
-    INPUT_REGISTRY=$(echo "$1" | tr '[A-Z]' '[a-z]')
-    echo "::debug::INPUT_REGISTRY: $INPUT_REGISTRY"
+    registry=$(echo "$1" | tr '[A-Z]' '[a-z]')
+    echo "::debug::registry: $registry"
 }
 
 nameToLower() {
@@ -121,8 +121,8 @@ isPullRequest() {
 
 changeWorkingDirectory() {
     echo "::debug::changeWorkingDirectory"
-    cd "${INPUT_WORKDIR}"
-    echo "::debug::INPUT_WORKDIR: $INPUT_WORKDIR"
+    cd "${workdir}"
+    echo "::debug::workdir: $workdir"
 }
 
 useCustomDockerfile() {
