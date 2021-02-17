@@ -52,8 +52,8 @@ sanitize() {
 }
 
 registry_urlToLower() {
-    echo "::debug::registry_urlToLower [$1]"
-    registry_url=$(echo "$1" | tr '[A-Z]' '[a-z]')
+    echo "::debug::registry_urlToLower [$registry_url]"
+    registry_url=$(echo "$registry_url" | tr '[A-Z]' '[a-z]')
     echo "::debug::registry_url: $registry_url"
 }
 
@@ -69,6 +69,7 @@ isPartOfTheName() {
 }
 
 translateDockerTag() {
+    echo "::debug::translateDockerTag [$1]"
     local BRANCH=$(echo "$1" | sed -e "s/refs\/heads\///g" | sed -e "s/\//-/g")
     if hasCustomTag; then
         TAGS=$(echo "${name}" | cut -d':' -f2)
@@ -102,7 +103,7 @@ translateDockerTag() {
 }
 
 hasCustomTag() {
-    echo "::debug::hasCustomTag"
+    echo "::debug::hasCustomTag [$name]"
     [ $(echo "${name}" | sed -e "s/://g") != "${name}" ]
 }
 
