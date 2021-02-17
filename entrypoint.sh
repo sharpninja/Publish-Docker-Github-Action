@@ -2,7 +2,7 @@
 set -e
 
 main() {
-  echo "" # see https://github.com/actions/toolkit/issues/168
+  echo "::debug::Starting." # see https://github.com/actions/toolkit/issues/168
 
   if usesBoolean "${ACTIONS_STEP_DEBUG}"; then
 #     echo "::add-mask::${INPUT_USERNAME}"
@@ -22,12 +22,12 @@ main() {
   REGISTRY_NO_PROTOCOL=$(echo "${$1}" | sed -e 's/^https:\/\///g')
   if uses "${INPUT_REGISTRY}" && ! isPartOfTheName "${REGISTRY_NO_PROTOCOL}"; then
     INPUT_NAME="${REGISTRY_NO_PROTOCOL}/${INPUT_NAME}"
-    echo "INPUT_NAME: $INPUT_NAME"
+    echo "::debug::INPUT_NAME: $INPUT_NAME"
   fi
 
   if uses "${INPUT_TAGS}"; then
     TAGS=$(echo "${$1}" | sed "s/,/ /g")
-    echo "TAGS: $TAGS"
+    echo "::debug::TAGS: $TAGS"
   else
     translateDockerTag
   fi
@@ -37,18 +37,18 @@ main() {
   fi
 
   if uses "${INPUT_USERNAME}" && uses "${INPUT_PASSWORD}"; then
-    echo "docker login -u ${INPUT_USERNAME} -p ${INPUT_PASSWORD} ${INPUT_REGISTRY} --verbose"
+    echo "::debug::docker login -u ${INPUT_USERNAME} -p ${INPUT_PASSWORD} ${INPUT_REGISTRY} --verbose"
     docker login -u ${INPUT_USERNAME} -p ${INPUT_PASSWORD} ${INPUT_REGISTRY} --verbose
   fi
 
   FIRST_TAG=$(echo "${$1}" | cut -d ' ' -f1)
-  echo "FIRST_TAG: $FIRST_TAG"
+  echo "::debug::FIRST_TAG: $FIRST_TAG"
   DOCKERNAME="${INPUT_NAME}:${FIRST_TAG}"
-  echo "DOCKERNAME: $DOCKERNAME"
+  echo "::debug::DOCKERNAME: $DOCKERNAME"
   BUILDPARAMS=""
-  echo "BUILDPARAMS: $BUILDPARAMS"
+  echo "::debug::BUILDPARAMS: $BUILDPARAMS"
   CONTEXT="."
-  echo "CONTEXT: $CONTEXT"
+  echo "::debug::CONTEXT: $CONTEXT"
 
   if uses "${INPUT_DOCKERFILE}"; then
     useCustomDockerfile
@@ -58,7 +58,7 @@ main() {
   fi
   if uses "${INPUT_CONTEXT}"; then
     CONTEXT="${INPUT_CONTEXT}"
-    echo "CONTEXT: $CONTEXT"
+    echo "::debug::CONTEXT: $CONTEXT"
   fi
   if usesBoolean "${INPUT_CACHE}"; then
     useBuildCache
@@ -71,6 +71,7 @@ main() {
 
   if usesBoolean "${INPUT_NO_PUSH}"; then
     if uses "${INPUT_USERNAME}" && uses "${INPUT_PASSWORD}"; then
+      echo "::debug::docker logout"
       docker logout
     fi
     exit 0
@@ -81,25 +82,27 @@ main() {
   echo "::set-output name=tag::${FIRST_TAG}"
   DIGEST=${docker inspect --format='{{index .RepoDigests 0}}' ${DOCKERNAME}}
   echo "::set-output name=digest::${DIGEST}"
+  echo "::debug::FIRST_TAG: $FIRST_TAG"
+  echo "::debug::DIGEST: $DIGEST"
 
   docker logout
 }
 
 sanitize() {
-  if [ -z "${1}" ]; then
-    >&2 echo "Unable to find the ${2}. Did you set with.${2}?"
+  if [ -z "$1" ]; then
+    >&2 echo "Unable to find the $2. Did you set with: $2?"
     exit 1
   fi
 }
 
 registryToLower(){
  INPUT_REGISTRY=$(echo "${$1}" | tr '[A-Z]' '[a-z]')
- echo "INPUT_REGISTRY: $INPUT_REGISTRY"
+ echo "::debug::INPUT_REGISTRY: $INPUT_REGISTRY"
 }
 
 nameToLower(){
   INPUT_NAME=$(echo "${INPUT_NAME}" | tr '[A-Z]' '[a-z]')
-  echo "INPUT_NAME: $INPUT_NAME"
+  echo "::debug::INPUT_NAME: $INPUT_NAME"
 }
 
 isPartOfTheName() {
@@ -110,32 +113,32 @@ translateDockerTag() {
   local BRANCH=$(echo "${$1}" | sed -e "s/refs\/heads\///g" | sed -e "s/\//-/g")
   if hasCustomTag; then
     TAGS=$(echo "${INPUT_NAME}" | cut -d':' -f2)
-    echo "TAGS: $TAGS"
+    echo "::debug::TAGS: $TAGS"
     INPUT_NAME=$(echo "${INPUT_NAME}" | cut -d':' -f1)
-    echo "INPUT_NAME: $INPUT_NAME"
+    echo "::debug::INPUT_NAME: $INPUT_NAME"
   elif isOnDefaultBranch; then
     TAGS="latest"
-    echo "TAGS: $TAGS"
+    echo "::debug::TAGS: $TAGS"
   elif isGitTag && usesBoolean "${INPUT_TAG_SEMVER}" && isSemver "${GITHUB_REF}"; then
     if isPreRelease "${GITHUB_REF}"; then
       TAGS=$(echo "${$1}" | sed -e "s/refs\/tags\///g" | sed -E "s/v?([0-9]+)\.([0-9]+)\.([0-9]+)(-[a-zA-Z]+(\.[0-9]+)?)?/\1.\2.\3\4/g")
-      echo "TAGS: $TAGS"
+      echo "::debug::TAGS: $TAGS"
     else
       TAGS=$(echo "${$1}" | sed -e "s/refs\/tags\///g" | sed -E "s/v?([0-9]+)\.([0-9]+)\.([0-9]+)/\1.\2.\3\4 \1.\2\4 \1\4/g")
-      echo "TAGS: $TAGS"
+      echo "::debug::TAGS: $TAGS"
     fi
   elif isGitTag && usesBoolean "${INPUT_TAG_NAMES}"; then
     TAGS=$(echo "${$1}" | sed -e "s/refs\/tags\///g")
-    echo "TAGS: $TAGS"
+    echo "::debug::TAGS: $TAGS"
   elif isGitTag; then
     TAGS="latest"
-    echo "TAGS: $TAGS"
+    echo "::debug::TAGS: $TAGS"
   elif isPullRequest; then
     TAGS="${GITHUB_SHA}"
-    echo "TAGS: $TAGS"
+    echo "::debug::TAGS: $TAGS"
   else
     TAGS="${BRANCH}"
-    echo "TAGS: $TAGS"
+    echo "::debug::TAGS: $TAGS"
   fi;
 }
 
@@ -161,26 +164,26 @@ isPullRequest() {
 
 changeWorkingDirectory() {
   cd "${INPUT_WORKDIR}"
-  echo "INPUT_WORKDIR: $INPUT_WORKDIR"
+  echo "::debug::INPUT_WORKDIR: $INPUT_WORKDIR"
 }
 
 useCustomDockerfile() {
   BUILDPARAMS="${BUILDPARAMS} -f ${INPUT_DOCKERFILE}"
-  echo "BUILDPARAMS: $BUILDPARAMS"
+  echo "::debug::BUILDPARAMS: $BUILDPARAMS"
 }
 
 addBuildArgs() {
   for ARG in $(echo "${$1}" | tr ',' '\n'); do
     BUILDPARAMS="${BUILDPARAMS} --build-arg ${ARG}"
-    echo "BUILDPARAMS: $BUILDPARAMS"
-    echo "ARG: $ARG"
+    echo "::debug::BUILDPARAMS: $BUILDPARAMS"
+    echo "::debug::ARG: $ARG"
   done
 }
 
 useBuildCache() {
   if docker pull "${DOCKERNAME}" 2>/dev/null; then
     BUILDPARAMS="${BUILDPARAMS} --cache-from ${DOCKERNAME}"
-    echo "BUILDPARAMS: $BUILDPARAMS"
+    echo "::debug::BUILDPARAMS: $BUILDPARAMS"
   fi
 }
 
@@ -206,13 +209,14 @@ useSnapshot() {
   local SNAPSHOT_TAG="${TIMESTAMP}${SHORT_SHA}"
   TAGS="${TAGS} ${SNAPSHOT_TAG}"
   echo "::set-output name=snapshot-tag::${SNAPSHOT_TAG}"
+  echo "::debug::TAGS: $TAGS"
 }
 
 build() {
   local BUILD_TAGS=""
   for TAG in ${TAGS}; do
     BUILD_TAGS="${BUILD_TAGS}-t ${INPUT_NAME}:${TAG} "
-    echo "BUILD_TAGS: $BUILD_TAGS"
+    echo "::debug::BUILD_TAGS: $BUILD_TAGS"
   done
   echo "docker build ${INPUT_BUILDOPTIONS} ${BUILDPARAMS} ${BUILD_TAGS} ${CONTEXT}"
   docker build ${INPUT_BUILDOPTIONS} ${BUILDPARAMS} ${BUILD_TAGS} ${CONTEXT}
@@ -220,9 +224,11 @@ build() {
 
 push() {
   for TAG in ${TAGS}; do
-    echo "docker push \"${INPUT_NAME}:${TAG}\""
+    echo "::debug::docker push \"${INPUT_NAME}:${TAG}\""
     docker push "${INPUT_NAME}:${TAG}"
   done
 }
 
 main
+
+echo "::debug::Finished."
